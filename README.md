@@ -6,7 +6,7 @@
 
 <p align="center"><em>Mapping Motion through time</em></p>
 
-<p align="center"><a href="https://qronox-kinetrix.stark-kodex.workers.dev"><strong>Drive the Simulation</strong></a></p>
+<p align="center"><a href="https://impetus-kinetrix.stark-kodex.workers.dev/"><strong>Drive the Simulation</strong></a></p>
 
 <p align="center">
   <a href="#about">About</a> ·
