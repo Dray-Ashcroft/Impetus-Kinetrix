@@ -584,6 +584,26 @@
    const qL=new T.Quaternion().setFromRotationMatrix(_m2.multiply(_m1.transpose())).multiply(B.footQ);
    setW(B.foot,chassis.getWorldQuaternion(new T.Quaternion()).multiply(qL));
   }
+  // ---------- rear-view mirror: a live view back at the driver (Driver view only) ----------
+  const MIRROR_POS=new T.Vector3(0,1.14,-.9),MIRROR_AT=new T.Vector3(0,.82,.9);
+  const mirrorRT=new T.WebGLRenderTarget(640,180);mirrorRT.texture.encoding=T.sRGBEncoding;
+  const mirrorCam=new T.PerspectiveCamera(15,640/180,.05,400);
+  const mirror=new T.Group();mirror.position.copy(MIRROR_POS);chassis.add(mirror);
+  {const dark=new T.MeshStandardMaterial({color:lin('#111417'),roughness:.5,metalness:.3});
+   const box=new T.Mesh(new T.BoxGeometry(.23,.072,.03),dark);box.position.z=-.012;mirror.add(box);
+   const stem=new T.Mesh(new T.CylinderGeometry(.008,.008,.06,8),dark);stem.position.set(0,.06,-.02);mirror.add(stem);
+   const map=mirrorRT.texture;map.repeat.x=-1;map.offset.x=1;                 // mirror image: flip left–right
+   const glass=new T.Mesh(new T.PlaneGeometry(.214,.06),new T.MeshBasicMaterial({map,toneMapped:false}));glass.position.z=.004;mirror.add(glass);mirror.userData.glass=glass}
+  mirror.rotation.x=-.12;                                                     // tilted slightly down towards the driver
+  let mirrorTick=0;
+  function renderMirror(){
+   if(mode!=='cockpit'||(mirrorTick++&1))return;                            // only in Driver view, every other frame
+   mirrorCam.position.copy(chassis.localToWorld(MIRROR_POS.clone()));mirrorCam.lookAt(chassis.localToWorld(MIRROR_AT.clone()));
+   for(const o of headMeshes)o.visible=true;mirror.visible=false;
+   const au=renderer.shadowMap.autoUpdate;renderer.shadowMap.autoUpdate=false;
+   renderer.setRenderTarget(mirrorRT);renderer.render(scene,mirrorCam);renderer.setRenderTarget(null);
+   renderer.shadowMap.autoUpdate=au;mirror.visible=true;syncHead();
+  }
   const pcEl=document.getElementById('pedalcam'),plAcc=document.getElementById('plAcc'),plBrk=document.getElementById('plBrk');
   function renderPedalCam(st){
    if(!pcEl||pcEl.classList.contains('min'))return;
@@ -675,17 +695,19 @@
      sp.theta+=lookYaw;sp.phi=Math.min(Math.PI-.08,Math.max(.08,sp.phi+lookPitch));look.copy(camera.position).add(new T.Vector3().setFromSpherical(sp))}
    }
    fov+=(wantFov-fov)*Math.min(1,dt*4);camera.fov=fov;camera.updateProjectionMatrix();camera.lookAt(look);
+   renderMirror();
    renderer.render(scene,camera);
    renderPedalCam(st);
   }
   function setMode(m){mode=m;fov=m==='chase'?50:62;resetLook();host.classList.toggle('freelook',m==='cockpit');syncHead()}
   function syncHead(){for(const o of headMeshes)o.visible=mode!=='cockpit'}
   // ---------- Driver view: drag to look around (all directions); double-tap or the ⟲ button to face forward again ----------
+  const YAW_MAX=1.75;                                        // head turns about 100° each way, like a real driver (no looking through the back of his head)
   let lookYaw=0,lookPitch=0,drag=null;const cv=renderer.domElement,recBtn=document.getElementById('recenter');
   function resetLook(){lookYaw=0;lookPitch=0;if(recBtn)recBtn.hidden=true}
   cv.addEventListener('pointerdown',e=>{if(mode!=='cockpit')return;drag={id:e.pointerId,x:e.clientX,y:e.clientY,yaw:lookYaw,pitch:lookPitch};try{cv.setPointerCapture(e.pointerId)}catch(_){}});
   cv.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const k=2.4/Math.max(200,cv.clientWidth);
-   lookYaw=drag.yaw+(e.clientX-drag.x)*k;lookPitch=Math.max(-1.25,Math.min(1.25,drag.pitch+(e.clientY-drag.y)*k));
+   lookYaw=Math.max(-YAW_MAX,Math.min(YAW_MAX,drag.yaw+(e.clientX-drag.x)*k));lookPitch=Math.max(-1.25,Math.min(1.25,drag.pitch+(e.clientY-drag.y)*k));
    if(recBtn)recBtn.hidden=Math.abs(lookYaw)<.03&&Math.abs(lookPitch)<.03});
   const endDrag=e=>{if(drag&&e.pointerId===drag.id)drag=null};cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
   cv.addEventListener('dblclick',()=>{if(mode==='cockpit')resetLook()});
