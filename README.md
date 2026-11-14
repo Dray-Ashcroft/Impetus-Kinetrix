@@ -75,7 +75,7 @@ A concept car drives in the left lane of an endless suspension bridge over open 
 | View | What you see |
 |:--|:--|
 | **Chase** | Camera behind the car; distance boards every 10 m and reflector posts every 6 m. |
-| **Driver** | Through the driver's eyes. Green LEDs show **speed (km/h)**, blue LEDs the **odometer (m)**. **Drag** to look around; ⟲ or double-tap faces forward. |
+| **Driver** | Through the driver's eyes. Green LEDs show **speed (km/h)**, blue LEDs the **odometer (m)**. **Drag** to look around (up to about 100° each way); ⟲ or double-tap faces forward. The rear-view mirror shows the driver's face. |
 | **Foot cam** | Top-left mini view of the footwell: the right foot presses the **accelerator** and moves across to the **brake**. |
 
 ---
@@ -168,7 +168,7 @@ A **single-file build** (`Impetus-Kinetrix.html`, every model inside) runs offli
 ├── three.min.js        Three.js r128
 ├── GLTFLoader.js       glTF model loader
 └── assets/
-    ├── banner-impetus.png
+    ├── banner/         banner-impetus.png
     ├── models/         3D models (.glb)
     └── screenshots/
 ```
