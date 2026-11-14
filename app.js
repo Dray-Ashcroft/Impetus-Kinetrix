@@ -294,7 +294,7 @@
   const refL=new T.InstancedMesh(refGeo,new T.MeshBasicMaterial({color:lin('#ffb020'),toneMapped:false}),REF_N);
   const refR=new T.InstancedMesh(refGeo,new T.MeshBasicMaterial({color:lin('#f2f6ff'),toneMapped:false}),REF_N);
   {const m=new T.Matrix4();for(let i=0;i<REF_N;i++){m.makeTranslation(-3.92,1.0,30-i*REF_GAP);refL.setMatrixAt(i,m);m.makeTranslation(3.95,.45,30-i*REF_GAP);refR.setMatrixAt(i,m)}}
-  const refs=new T.Group();refs.add(refL,refR);scene.add(refs);
+  const refs=new T.Group();refs.add(refL);scene.add(refs);   // amber posts on the left barrier only (the white median posts looked like broken pipes)
   const water=new T.Mesh(new T.PlaneGeometry(4000,4000),new T.MeshStandardMaterial({color:lin('#24566b'),roughness:.18,metalness:.25,envMapIntensity:1.2}));
   water.rotation.x=-Math.PI/2;water.position.y=-29;scene.add(water);
   hills.position.y=-24;
@@ -584,21 +584,40 @@
    const qL=new T.Quaternion().setFromRotationMatrix(_m2.multiply(_m1.transpose())).multiply(B.footQ);
    setW(B.foot,chassis.getWorldQuaternion(new T.Quaternion()).multiply(qL));
   }
-  // ---------- rear-view mirror: a live view back at the driver (Driver view only) ----------
-  const MIRROR_POS=new T.Vector3(0,1.14,-.9),MIRROR_AT=new T.Vector3(0,.82,.9);
-  const mirrorRT=new T.WebGLRenderTarget(640,180);mirrorRT.texture.encoding=T.sRGBEncoding;
-  const mirrorCam=new T.PerspectiveCamera(15,640/180,.05,400);
-  const mirror=new T.Group();mirror.position.copy(MIRROR_POS);chassis.add(mirror);
-  {const dark=new T.MeshStandardMaterial({color:lin('#111417'),roughness:.5,metalness:.3});
-   const box=new T.Mesh(new T.BoxGeometry(.23,.072,.03),dark);box.position.z=-.012;mirror.add(box);
-   const stem=new T.Mesh(new T.CylinderGeometry(.008,.008,.06,8),dark);stem.position.set(0,.06,-.02);mirror.add(stem);
+  // ---------- rear-view mirror: glass-mounted on a polished swivel arm, live view back at the driver (Driver view only) ----------
+  const MOUNT=new T.Vector3(0,1.065,-.5),GLASS_N=new T.Vector3(0,1,-.197).normalize();   // on the inside of the canopy glass, just ahead of the driver
+  const BALL=MOUNT.clone().addScaledVector(GLASS_N,-.026);                     // swivel ball under the stem
+  const MIRROR_POS=BALL.clone().add(new T.Vector3(0,-.006,.014));              // centre of the mirror glass
+  const MW=.084,MH=.026;                                                        // mirror glass size (m)
+  const mirrorRT=new T.WebGLRenderTarget(512,164);mirrorRT.texture.encoding=T.sRGBEncoding;
+  const mirrorCam=new T.PerspectiveCamera(26,MW/MH,.1,400);
+  const mirror=new T.Group();chassis.add(mirror);
+  {const chrome=new T.MeshStandardMaterial({color:lin('#dfe3e8'),metalness:1,roughness:.12,envMapIntensity:1.4});
+   const piano=new T.MeshStandardMaterial({color:lin('#0b0d10'),metalness:.35,roughness:.2,envMapIntensity:1.2});
+   const add=(geo,mat,parent)=>{const m=new T.Mesh(geo,mat);parent.add(m);return m};
+   // fixed part: pad on the glass, stem, swivel ball
+   const base=new T.Group();base.position.copy(MOUNT);base.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),GLASS_N);mirror.add(base);
+   add(new T.CylinderGeometry(.016,.019,.006,32),piano,base).position.y=-.003;
+   add(new T.CylinderGeometry(.0042,.0056,.022,20),chrome,base).position.y=-.015;
+   add(new T.SphereGeometry(.0085,24,16),chrome,mirror).position.copy(BALL);
+   // swivelling head: turned on the ball to face the driver's eyes
+   const head=new T.Group();head.position.copy(MIRROR_POS);mirror.add(head);
+   head.quaternion.setFromRotationMatrix(new T.Matrix4().lookAt(EYE,MIRROR_POS,new T.Vector3(0,1,0)));
+   const rr=(w,h,r)=>{const p=new T.Shape(),x=-w/2,y=-h/2;p.moveTo(x+r,y);p.lineTo(x+w-r,y);p.quadraticCurveTo(x+w,y,x+w,y+r);p.lineTo(x+w,y+h-r);p.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+     p.lineTo(x+r,y+h);p.quadraticCurveTo(x,y+h,x,y+h-r);p.lineTo(x,y+r);p.quadraticCurveTo(x,y,x+r,y);return p};
+   const shell=new T.ExtrudeGeometry(rr(MW+.012,MH+.012,.014),{depth:.012,bevelEnabled:true,bevelThickness:.004,bevelSize:.003,bevelSegments:4,curveSegments:10});
+   add(shell,piano,head).position.z=-.017;                                     // rounded piano-black housing
+   const rim=new T.ExtrudeGeometry(rr(MW+.004,MH+.004,.011),{depth:.002,bevelEnabled:false,curveSegments:10});
+   add(rim,chrome,head).position.z=-.001;                                      // thin chrome bezel
+   add(new T.CylinderGeometry(.0035,.0035,.016,16),chrome,head).position.set(0,.004,-.02);   // neck from the ball into the housing
    const map=mirrorRT.texture;map.repeat.x=-1;map.offset.x=1;                 // mirror image: flip left–right
-   const glass=new T.Mesh(new T.PlaneGeometry(.214,.06),new T.MeshBasicMaterial({map,toneMapped:false}));glass.position.z=.004;mirror.add(glass);mirror.userData.glass=glass}
-  mirror.rotation.x=-.12;                                                     // tilted slightly down towards the driver
+   add(new T.PlaneGeometry(MW,MH),new T.MeshBasicMaterial({map,toneMapped:false}),head).position.z=.0015}
   let mirrorTick=0;
   function renderMirror(){
    if(mode!=='cockpit'||(mirrorTick++&1))return;                            // only in Driver view, every other frame
-   mirrorCam.position.copy(chassis.localToWorld(MIRROR_POS.clone()));mirrorCam.lookAt(chassis.localToWorld(MIRROR_AT.clone()));
+   const virt=MIRROR_POS.clone().multiplyScalar(2).sub(EYE);                 // the driver's eye reflected behind the mirror
+   mirrorCam.near=MIRROR_POS.distanceTo(EYE);mirrorCam.updateProjectionMatrix();
+   mirrorCam.position.copy(chassis.localToWorld(virt));mirrorCam.lookAt(chassis.localToWorld(EYE.clone().add(new T.Vector3(0,-.03,.06))));
    for(const o of headMeshes)o.visible=true;mirror.visible=false;
    const au=renderer.shadowMap.autoUpdate;renderer.shadowMap.autoUpdate=false;
    renderer.setRenderTarget(mirrorRT);renderer.render(scene,mirrorCam);renderer.setRenderTarget(null);

@@ -18,10 +18,10 @@ Releases are numbered **RC** with Roman numerals (RC I, RC II, RC III …).
 - **Foot cam:** a mini view of the driver's legs on the pedals. The right foot presses the accelerator and moves across to the brake. It can be hidden, and stays hidden after a reload.
 - **LED dash:** speed in green (km/h) and odometer in blue (m) on a digital cluster.
 - **Free look:** drag to look around in Driver view, up to about 100° each way like a real head turn; tap ⟲ or double-tap to face forward.
-- **Rear-view mirror:** a live mirror on the windshield showing the driver's face in Driver view.
+- **Rear-view mirror:** mounted on the canopy glass on a polished chrome swivel, with a piano-black housing; shows the driver's face live in Driver view.
 - **Loading screen** with a spinning tyre and progress bar.
 - **Branding:** filled tyre logo (Material Design 3) beside the title.
-- **Reflector posts** every 6 m along the bridge, for a clearer sense of speed.
+- **Reflector posts** every 6 m along the left barrier, for a clearer sense of speed.
 - **Documentation:** rewritten README with screenshots, road modes, controls, teaching model and 3D model credits; this changelog.
 
 ### 🔄 Changed
