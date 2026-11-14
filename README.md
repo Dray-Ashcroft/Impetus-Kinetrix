@@ -57,7 +57,7 @@ Built for classroom smart panels; works on laptops and phones too.
   <tr>
     <td width="50%" align="center">
       <img src="assets/screenshots/Journey_Calculations.png" alt="Journey summary with average speed and speed in each part" width="100%">
-      <br><sub><b>Your journey, your calculations · Average speed</b></sub>
+      <br><sub><b>Calculating · Average speed</b></sub>
     </td>
     <td width="50%" align="center">
       <img src="assets/screenshots/Understanding_kinds_of_Motion.png" alt="Why averaging the part speeds is wrong, and what the graph tells us" width="100%">
