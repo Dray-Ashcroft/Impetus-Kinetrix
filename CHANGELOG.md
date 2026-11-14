@@ -56,6 +56,7 @@ Releases are numbered **RC** with Roman numerals (RC I, RC II, RC III …).
 - Traffic light console warnings (unsupported texture UV sets).
 - Empty foot cam and mode buttons on devices without 3D support.
 - Pedals off-screen on landscape phones.
+- Rear-view mirror jittering while driving (the driver's view now rides with the car body).
 
 ### 📦 Builds
 

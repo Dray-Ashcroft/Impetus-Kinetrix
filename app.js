@@ -585,9 +585,10 @@
    setW(B.foot,chassis.getWorldQuaternion(new T.Quaternion()).multiply(qL));
   }
   // ---------- rear-view mirror: glass-mounted on a polished swivel arm, live view back at the driver (Driver view only) ----------
-  const MOUNT=new T.Vector3(0,1.065,-.5),GLASS_N=new T.Vector3(0,1,-.197).normalize();   // on the inside of the canopy glass, just ahead of the driver
-  const BALL=MOUNT.clone().addScaledVector(GLASS_N,-.026);                     // swivel ball under the stem
-  const MIRROR_POS=BALL.clone().add(new T.Vector3(0,-.006,.014));              // centre of the mirror glass
+  const MOUNT=new T.Vector3(0,1.079,-.43),GLASS_N=new T.Vector3(0,1,-.197).normalize();   // on the inside of the canopy glass, just ahead of the driver
+  const MS=.6;                                                                 // overall mirror scale
+  const BALL=MOUNT.clone().addScaledVector(GLASS_N,-.026*MS);                     // swivel ball under the stem
+  const MIRROR_POS=BALL.clone().add(new T.Vector3(0,-.006,.014).multiplyScalar(MS));              // centre of the mirror glass
   const MW=.084,MH=.026;                                                        // mirror glass size (m)
   const mirrorRT=new T.WebGLRenderTarget(512,164);mirrorRT.texture.encoding=T.sRGBEncoding;
   const mirrorCam=new T.PerspectiveCamera(26,MW/MH,.1,400);
@@ -596,12 +597,12 @@
    const piano=new T.MeshStandardMaterial({color:lin('#0b0d10'),metalness:.35,roughness:.2,envMapIntensity:1.2});
    const add=(geo,mat,parent)=>{const m=new T.Mesh(geo,mat);parent.add(m);return m};
    // fixed part: pad on the glass, stem, swivel ball
-   const base=new T.Group();base.position.copy(MOUNT);base.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),GLASS_N);mirror.add(base);
+   const base=new T.Group();base.position.copy(MOUNT);base.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),GLASS_N);base.scale.setScalar(MS);mirror.add(base);
    add(new T.CylinderGeometry(.016,.019,.006,32),piano,base).position.y=-.003;
    add(new T.CylinderGeometry(.0042,.0056,.022,20),chrome,base).position.y=-.015;
-   add(new T.SphereGeometry(.0085,24,16),chrome,mirror).position.copy(BALL);
+   {const ball=add(new T.SphereGeometry(.0085,24,16),chrome,mirror);ball.position.copy(BALL);ball.scale.setScalar(MS)}
    // swivelling head: turned on the ball to face the driver's eyes
-   const head=new T.Group();head.position.copy(MIRROR_POS);mirror.add(head);
+   const head=new T.Group();head.position.copy(MIRROR_POS);head.scale.setScalar(MS);mirror.add(head);
    head.quaternion.setFromRotationMatrix(new T.Matrix4().lookAt(EYE,MIRROR_POS,new T.Vector3(0,1,0)));
    const rr=(w,h,r)=>{const p=new T.Shape(),x=-w/2,y=-h/2;p.moveTo(x+r,y);p.lineTo(x+w-r,y);p.quadraticCurveTo(x+w,y,x+w,y+r);p.lineTo(x+w,y+h-r);p.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
      p.lineTo(x+r,y+h);p.quadraticCurveTo(x,y+h,x,y+h-r);p.lineTo(x,y+r);p.quadraticCurveTo(x,y,x+r,y);return p};
@@ -707,9 +708,8 @@
     camOffZ+=((6.2+st.v*.06)-camOffZ)*Math.min(1,dt*3);
     camera.position.set(cx+1.0,2.3,cz+camOffZ);look.set(cx-.25,.85,cz-6);wantFov=50+st.v*.32;camera.near=.1;
    }else{
-    const shake=Math.sin(time*29)*.0015*rough;
-    const buzz=Math.sin(time*47)*.0009*Math.min(1,st.v/25);   // fine road buzz that grows with speed
-    camera.position.set(cx+EYE.x,EYE.y+shake+buzz+pitch*.4,cz+EYE.z);look.set(cx+EYE.x,EYE.y-1.45+pitch*4,cz-12);wantFov=64;camera.near=.03;
+    car.updateMatrixWorld(true);camera.position.copy(chassis.localToWorld(EYE.clone()));          // the head rides with the car body, so the road buzz moves cabin, mirror and eyes together (no jitter)
+    look.set(cx+EYE.x,EYE.y-1.45+pitch*4,cz-12);wantFov=64;camera.near=.03;
     if(lookYaw||lookPitch){const sp=new T.Spherical().setFromVector3(look.clone().sub(camera.position));   // free look: turn the head
      sp.theta+=lookYaw;sp.phi=Math.min(Math.PI-.08,Math.max(.08,sp.phi+lookPitch));look.copy(camera.position).add(new T.Vector3().setFromSpherical(sp))}
    }
