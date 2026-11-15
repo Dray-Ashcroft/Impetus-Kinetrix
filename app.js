@@ -326,7 +326,7 @@
   car.position.x=-1.8; // left lane
 
   const gltf=new T.GLTFLoader();
-  const paint=new T.MeshPhysicalMaterial({color:lin('#060708'),metalness:.45,roughness:.32,clearcoat:1,clearcoatRoughness:.06,envMapIntensity:1});   // glossy black paint with a clear coat
+  const paint=new T.MeshPhysicalMaterial({color:0x000000,metalness:0,roughness:.28,clearcoat:.5,clearcoatRoughness:.1,envMapIntensity:.18});   // deep black paint: dark base, soft clear-coat highlights (strong reflections made it read as silver)
   gltf.load('assets/models/lambo.glb',g=>{
    const model=g.scene;model.rotation.y=Math.PI;model.position.z=MODEL_DZ;chassis.add(model);
    car.updateMatrixWorld(true);
@@ -338,7 +338,8 @@
     else if(m.transparent){m.depthWrite=false;o.castShadow=false}
     m.envMapIntensity=m.envMapIntensity||1;if(m.map)m.map.anisotropy=ANISO;
     if(m.name==='Lumière rouge')tailMat=m;
-    if(m.name==='Carosserie'||(!m.name&&!m.map&&!m.transparent))o.material=paint;   // the Terzo's black paint (and parts the file left unpainted)
+    if(m.name==='Carosserie'||(!m.name&&!m.map&&!m.transparent))o.material=paint;
+    if(m.name==='Fer'||m.name==='Material.001'||m.name==='Material.040'){m.color.set(lin('#0b0c0d'));m.envMapIntensity=.4}   // dark trim panels, so the whole body reads black   // the Terzo's black paint (and parts the file left unpainted)
     if(m.name==='light001.001')o.visible=false;          // the model's fixed "0" read-out — replaced by the live display below
     if(m.name==='Vitres'||m.name==='glass'){m.transparent=true;m.opacity=Math.min(m.opacity,.18);m.envMapIntensity=.25;m.roughness=Math.max(m.roughness,.15);m.depthWrite=false;o.castShadow=false}   // lighter tint so the road is clear from the driver's seat
     let n=o;while(n&&n!==model&&!/^wheel_\d/.test(n.name))n=n.parent;               // wheel_0…3: rim, tyre and nuts of one wheel
