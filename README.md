@@ -6,29 +6,26 @@
 
 <p align="center"><em>Mapping Motion through time</em></p>
 
-<p align="center"><a href="https://impetus-kinetrix.stark-kodex.workers.dev/"><strong>Drive the Simulation</strong></a></p>
+<p align="center"><a href="https://qronox-kinetrix.stark-kodex.workers.dev"><strong>Launch the Simulator</strong></a></p>
 
 <p align="center">
   <a href="#about">About</a> ·
   <a href="#screenshots">Screenshots</a> ·
-  <a href="#the-car">Car</a> ·
-  <a href="#road-modes">Road modes</a> ·
-  <a href="#reading-the-data">Data</a> ·
-  <a href="#concepts-covered">Concepts</a> ·
+  <a href="#features">Features</a> ·
   <a href="#controls">Controls</a> ·
-  <a href="#teaching-model">Teaching model</a> ·
   <a href="#technology">Technology</a> ·
-  <a href="#3d-models">3D Models</a> ·
-  <a href="#credits">Credits</a>
+  <a href="#credits">Credits</a> ·
+  <a href="#releases">Releases</a> ·
+  <a href="#license">License</a>
 </p>
 
 ---
 
 ## About
 
-**Drive a sports car. Watch physics draw itself.**
+Impetus Kinetrix is a 3D driving simulator for teaching **distance, time and speed** through the **distance–time graph**. Students drive a Lamborghini across an endless suspension bridge while a live graph traces every metre against every second.
 
-An interactive 3D simulator for teaching distance, time and speed. Press the pedals and a live **distance–time graph** traces every metre against every second: **steeper** when faster, **flat** when stopped, **curved** when speeding up or slowing down. Built for classroom smart panels, laptops and phones.
+The graph shows the physics as it happens: **steeper** when faster, **flat** when stopped, **curved** when speeding up or slowing down. Marked points and a journey summary turn the drive into calculations of speed and average speed. Built for classroom smart panels, laptops and phones.
 
 ---
 
@@ -37,82 +34,64 @@ An interactive 3D simulator for teaching distance, time and speed. Press the ped
 <table width="100%">
   <tr>
     <td width="50%" align="center">
-      <img src="assets/screenshots/Refreshing_Learning.png" alt="Chase view with cruise on and the graph rising" width="100%">
-      <br><sub><b>Refreshing learning</b></sub>
+      <img src="assets/screenshots/Experience%20Physics%20by%20Driving.png" alt="Driver view with the distance–time graph starting" width="100%">
+      <br><sub><b>1 · Innovative Learning </b></sub>
     </td>
     <td width="50%" align="center">
-      <img src="assets/screenshots/Immersive_Driving.png" alt="Driver view with LED dash and hands on the wheel" width="100%">
-      <br><sub><b>Immersive driving</b></sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="assets/screenshots/Observe_and_Discover.png" alt="Car waiting at a checkpoint with marked points on the graph" width="100%">
-      <br><sub><b>Observe &amp; discover</b></sub>
-    </td>
-    <td width="50%" align="center">
-      <img src="assets/screenshots/Experience_the_Traffic.png" alt="Following a slow car with speed between marked points" width="100%">
-      <br><sub><b>Experience the traffic</b></sub>
+      <img src="assets/screenshots/Immersive%20Driving.png" alt="Chase view with marked points and speed between them" width="100%">
+      <br><sub><b>2 · Immersive Driving</b></sub>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <img src="assets/screenshots/Journey_Calculations.png" alt="Journey summary with average speed and speed in each part" width="100%">
-      <br><sub><b>Your journey, your calculations</b></sub>
+      <img src="assets/screenshots/Observe_and_Discover.png" alt="Car stopped at a checkpoint barrier; the graph flattens" width="100%">
+      <br><sub><b>3 · Observe &amp; Discover</b></sub>
     </td>
     <td width="50%" align="center">
-      <img src="assets/screenshots/Understanding_kinds_of_Motion.png" alt="Why averaging the part speeds is wrong, and what the graph tells us" width="100%">
-      <br><sub><b>Understand · Experience · Calculate</b></sub>
+      <img src="assets/screenshots/Journey_Calculations%201.png" alt="Following a slow car with several marked points" width="100%">
+      <br><sub><b>4 · Calculate Journey</b></sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/Journey_Calculations%202.png" alt="Journey summary with total distance, time and average speed" width="100%">
+      <br><sub><b>5 · Journey Summary</b></sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/Understand%20%26%20Calculate.png" alt="Graph with marked points and speed for each part of the trip" width="100%">
+      <br><sub><b>6 · Experience, Calculate
+        </b></sub>
     </td>
   </tr>
 </table>
 
 ---
 
-## The Car
+## Features
 
-A concept car on an endless suspension bridge over open water.
-
-| Chase | Driver | Foot cam |
+| Feature | What You See | Try This |
 |:--|:--|:--|
-| Behind the car, with distance boards every 10 m | Through the driver's eyes: LED speed and odometer, free look and a rear-view mirror | The driver's feet on the accelerator and brake |
+| **Chase view** | The car from behind, distance boards every 10 m | Hold the accelerator and watch the graph steepen |
+| **Driver view** | Through the driver's eyes: race wheel, LED speed and odometer | Drag to look around (up to about 100° each way) |
+| **Foot cam** | The driver's feet on a carbon pedal box | Press brake and accelerator and watch the foot move |
+| **Infinity mode** | An open road | Use cruise to draw a straight line: uniform motion |
+| **Traffic mode** | A checkpoint, a traffic light and a slow car, 10 s apart | Watch flat parts and curves appear: non-uniform motion |
+| **Journey summary** | Total distance, total time and the speed of each part | Check why averaging part speeds gives the wrong answer |
 
----
-
-## Road Modes
-
-| Infinity | Traffic |
-|:--|:--|
-| An open road. Hold a steady speed for **uniform motion**: a straight line. | A checkpoint, a traffic light and a slow car, 10 s apart, on repeat. Every stop and restart draws **non-uniform motion**. |
-
----
-
-## Reading the Data
-
-- **Live graph:** distance against time; the axes grow with the trip.
-- **Marked points:** select the line between two points to see the speed between them.
-- **Journey summary:** average speed = total distance ÷ total time, and why averaging part speeds is wrong.
-- **Previous trip:** after Reset, the last trip stays on the graph for comparison.
-
----
-
-## Concepts Covered
-
-`Distance` · `Time` · `Speed = distance ÷ time` · `m/s ↔ km/h` · `Average speed` · `Rest` · `Uniform motion` · `Non-uniform motion` · `Slope = speed`
+**Concepts:** Distance · Time · Speed = distance ÷ time · m/s ↔ km/h · Average speed · Rest · Uniform motion · Non-uniform motion · Slope = speed
 
 ---
 
 ## Controls
 
-| Drive | Record | View |
-|:--|:--|:--|
-| Accelerate · Brake · Cruise | Start · Reset · Mark · Undo · End | Chase · Driver · Infinity · Traffic · Table · Full screen |
-
----
-
-## Teaching Model
-
-A deliberately simplified car: **4.6 m/s²** acceleration (0–100 km/h in about 6 s), **7.0 m/s²** braking, **38 m/s** top speed and gentle coasting. Distance only increases, so the graph never slopes down.
+| Control | Function |
+|:--|:--|
+| Accelerate · Brake (hold) | Speed up · slow down |
+| Cruise | Hold the current speed |
+| Pause · Reset | Freeze the clock · start a new trip (the last one stays as a ghost line) |
+| Mark · Undo | Add or remove a point on the graph |
+| End | Open the journey summary |
+| Chase · Driver · Infinity · Traffic | Switch camera or road mode |
 
 ---
 
@@ -120,20 +99,39 @@ A deliberately simplified car: **4.6 m/s²** acceleration (0–100 km/h in about
 
 HTML · CSS · JavaScript · Three.js · glTF · Cloudflare
 
-```
-index.html · style.css · app.js · three.min.js · GLTFLoader.js
-assets/  banner/ · models/ · screenshots/
-```
+<details>
+<summary><b>Project files</b></summary>
 
-Host the folder on any web server, or open the single-file build (`Impetus-Kinetrix.html`) offline.
+| File | Contents |
+|:--|:--|
+| `index.html` | Page layout |
+| `style.css` | Styling |
+| `app.js` | Physics, graph, traffic and 3D scene |
+| `three.min.js` · `GLTFLoader.js` | Three.js r128 and its glTF loader |
+| `assets/models/` | 3D models (.glb) |
+| `assets/banner/` · `assets/screenshots/` | README images |
+
+A single-file offline build (`Impetus-Kinetrix.html`) is attached to each release.
+
+</details>
 
 ---
 
-## 3D Models
+## Credits
+
+| Contributor | Role |
+|:--|:--|
+| Sai Prasad, M.Sc. Agri. Entomology, ASRB NET | Project Designer |
+| Claude Opus 5.5 | Development |
+| OpenAI GPT Luna 5.7 | Image Generation |
+| Perplexity Sonar 2 | Scientific Reasoning |
+
+<details>
+<summary><b>3D models</b></summary>
 
 | Asset | Model | Creator | Licence |
 |:--|:--|:--|:--|
-| Car | [FREE Concept Car 004](https://sketchfab.com/3d-models/free-concept-car-004-public-domain-cc0-4cba124633eb494eadc3bb0c4660ad7e) | Unity Fan | Sketchfab Standard ¹ |
+| Car | FREE Lamborghini Terzo Millennio | Noredine Allam ¹ | Not recorded ¹ |
 | Bridge | [Car_ Animation](https://sketchfab.com/3d-models/car--animation-cb83f35f5a5942b7a5e7756366797b6a) | lawanya B | CC BY 4.0 |
 | Steering wheel | [Race Steering Wheel – Lamborghini Essenza SCV12](https://sketchfab.com/3d-models/race-steering-wheel-lamborghini-essenza-scv12-7fd7543c58994fd09344d761978eecfa) | SDC PERFORMANCE | CC BY 4.0 |
 | Driver | [Connor RK900 – Detroit Become Human](https://sketchfab.com/3d-models/connor-rk900-detroit-become-human-623e3f52b7da4116a4576f38479eaaaf) | Q.SARDOR | CC BY 4.0 |
@@ -142,22 +140,36 @@ Host the folder on any web server, or open the single-file build (`Impetus-Kinet
 | Traffic cars | [Traffic Car Pack](https://sketchfab.com/3d-models/traffic-car-pack-916a8b149ae24d8b8c9cf12d4a1c64d4) | JUSTGAME | CC BY 4.0 |
 | Dash cluster | [Digital Speedometer](https://sketchfab.com/3d-models/digital-speedometer-48ebbd6321b44617b32e7bfa91c81e2d) | ROY | CC BY 4.0 |
 
-<sub>Creators keep ownership; models were simplified and resized.<br>¹ Title says CC0, but the file lists the Sketchfab Standard licence. Check before reusing.</sub>
+Models were simplified and resized; creators keep ownership under their licences.<br>
+¹ Creator taken from the model file; source link and licence not recorded.
+
+</details>
+
+<details>
+<summary><b>Libraries and fonts</b></summary>
+
+| Component | Licence |
+|:--|:--|
+| Three.js r128 · GLTFLoader | MIT |
+| IBM Plex Sans · IBM Plex Mono · Roboto (Google Fonts) | SIL OFL 1.1 · Apache 2.0 |
+
+</details>
 
 ---
 
-## Credits
+## Releases
 
-| Contributor | Role |
-|:--|:--|
-| OpenAI | Initial code implementation |
-| Claude | Code architecture |
-| Perplexity | Scientific validation and debugging |
-| GitHub & Codeberg | Repository |
-| Cloudflare | Hosting |
+| Release | Title | Date |
+|:--|:--|:--|
+| RC II | 3D Revamp | 2026-11-14 |
+| RC I | Initial release (QronoX Kinetrix) | — |
+
+Full history: [CHANGELOG](CHANGELOG.md)
 
 ---
 
 ## License
 
-Code: **MIT** ([LICENSE](LICENSE)) · 3D models keep their own licences · [Changelog](CHANGELOG.md)
+Code: **MIT** ([LICENSE](LICENSE)) · 3D models keep their own licences.
+
+<p align="center"><sub>GitHub · Codeberg &nbsp;|&nbsp; Hosted on Cloudflare</sub></p>
