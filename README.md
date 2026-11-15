@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner/banner-impetus.png" alt="Impetus Kinetrix — Mapping Motion through time" width="100%">
+  <img src="assets/banner/Impetus-banner.png" alt="Impetus Kinetrix — Mapping Motion through time" width="100%">
 </p>
 
 <h1 align="center">Impetus Kinetrix</h1>
