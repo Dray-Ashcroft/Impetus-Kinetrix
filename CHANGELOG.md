@@ -18,7 +18,6 @@ Releases are numbered **RC** with Roman numerals (RC I, RC II, RC III …).
 - **Foot cam:** a mini view of the driver's legs on the pedals. The right foot presses the accelerator and moves across to the brake. It can be hidden, and stays hidden after a reload.
 - **LED dash:** speed in green (km/h) and odometer in blue (m) on a digital cluster.
 - **Free look:** drag to look around in Driver view, up to about 100° each way like a real head turn; tap ⟲ or double-tap to face forward.
-- **Rear-view mirror:** mounted on the canopy glass on a polished chrome swivel, with a piano-black housing; shows the driver's face live in Driver view.
 - **Loading screen** with a spinning tyre and progress bar.
 - **Branding:** filled tyre logo (Material Design 3) beside the title.
 - **Reflector posts** every 6 m along the left barrier, for a clearer sense of speed.
@@ -27,14 +26,14 @@ Releases are numbered **RC** with Roman numerals (RC I, RC II, RC III …).
 ### 🔄 Changed
 
 - **Name:** QronoX Kinetrix → **Impetus Kinetrix** · *Mapping Motion through time*.
-- **Car:** FREE Concept Car 004, with a centre driving seat, spinning wheels and working pedals.
+- **Car:** Lamborghini Terzo Millennio in glossy black, left-hand drive, with spinning wheels, working pedals and the race steering wheel fitted.
 - **Environment:** a suspension bridge over open water that repeats endlessly (Car_ Animation scene, other cars removed).
 - **Steering wheel:** Lamborghini Essenza SCV12 race wheel.
 - **Driver:** Connor RK900, full body, seated in a reclined sports-car position.
   - Hands grip the wheel; feet work the pedals.
   - Visible through the windshield in Chase view.
   - Driver view sees through his eyes; look down to see his body.
-- **Footwell:** carpeted floor and walls, sloped toe-board and pedal bracket under the dash.
+- **Footwell:** carpeted floor and walls, sloped toe-board, and a sculpted carbon pedal shroud under the dash hiding the pivot shaft, with two curved polished-alloy pedals and rubber-inlaid pads.
 - **Physics:** acceleration 4.6 m/s² (0–100 km/h in about 6 s); top speed 38 m/s.
 - **Layout:** larger, sharper road view; black background with thin, neutral card borders.
 - **Screenshots:** six new screenshots in `assets/screenshots/`.
@@ -56,7 +55,7 @@ Releases are numbered **RC** with Roman numerals (RC I, RC II, RC III …).
 - Traffic light console warnings (unsupported texture UV sets).
 - Empty foot cam and mode buttons on devices without 3D support.
 - Pedals off-screen on landscape phones.
-- Rear-view mirror jittering while driving (the driver's view now rides with the car body).
+- Driver view jitter while driving (the camera now rides with the car body).
 
 ### 📦 Builds
 

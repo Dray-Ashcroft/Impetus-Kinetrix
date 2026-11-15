@@ -312,19 +312,22 @@
    updateScenery(lastS);markReady('bridge');
   },undefined,err=>{console.warn('Bridge GLB failed to load',err);markReady('bridge')});
 
-  // ---------- the car: "FREE Concept Car 004" (GLB) — centre driving seat (1+2+1 layout), drives in the left lane ----------
+  // ---------- the car: Lamborghini Terzo Millennio (GLB) — left-hand drive two-seater, drives in the left lane ----------
   const car=new T.Group(),chassis=new T.Group();car.add(chassis);scene.add(car);
-  const MODEL_DZ=.0855;                                     // GLB is in metres, y-up, ground at 0, nose at +z: turn it round and centre the wheelbase
-  const TYRE_R=.384;                                        // tyre radius (m) — the wheels turn exactly with distance travelled
+  const MODEL_DZ=0;                                         // GLB is in metres, y-up, ground at 0, nose at +z, wheelbase centred: just turn it round
+  const TYRE_R=.35;                                        // tyre radius (m) — the wheels turn exactly with distance travelled
   const spinners=[],glows=[];
   let tailMat={emissiveIntensity:0};                        // replaced by the GLB's rear-lamp material once loaded
-  const EYE=new T.Vector3(0,1.02,-.27);                      // driver's eye in car space (centre seat)
-  const WHEEL=new T.Vector3(0,.654,-.849),WHEEL_R=.15;      // steering wheel centre / rim radius in car space
+  const DRIVER_X=-.34;                                      // the left-hand seat (car space: -x is the driver's left)
+  const EYE=new T.Vector3(DRIVER_X,.82,.05);
+  const CAM_LIFT=new T.Vector3(0,.035,-.02);                // Driver view camera sits a touch above and ahead of his eyes, for a clearer view over the dash                // driver's eye in car space: low and well back, under the canopy
+  const WHEEL=new T.Vector3(DRIVER_X,.6,-.54),WHEEL_R=.15;      // steering wheel centre / rim radius in car space
   const WHEEL_UP=new T.Vector3(0,.91,-.41).normalize();     // rim plane 'up' (wheel is raked towards the driver)
   car.position.x=-1.8; // left lane
 
   const gltf=new T.GLTFLoader();
-  gltf.load('assets/models/concept_car.glb',g=>{
+  const paint=new T.MeshPhysicalMaterial({color:lin('#060708'),metalness:.45,roughness:.32,clearcoat:1,clearcoatRoughness:.06,envMapIntensity:1});   // glossy black paint with a clear coat
+  gltf.load('assets/models/lambo.glb',g=>{
    const model=g.scene;model.rotation.y=Math.PI;model.position.z=MODEL_DZ;chassis.add(model);
    car.updateMatrixWorld(true);
    const wheelParts={};
@@ -334,32 +337,71 @@
     if(m.name==='Material.008'){o.castShadow=false;o.receiveShadow=false;m.depthWrite=false}   // baked ground shadow
     else if(m.transparent){m.depthWrite=false;o.castShadow=false}
     m.envMapIntensity=m.envMapIntensity||1;if(m.map)m.map.anisotropy=ANISO;
-    if(m.name==='taillight_cover')tailMat=m;
+    if(m.name==='Lumière rouge')tailMat=m;
+    if(m.name==='Carosserie'||(!m.name&&!m.map&&!m.transparent))o.material=paint;   // the Terzo's black paint (and parts the file left unpainted)
     if(m.name==='light001.001')o.visible=false;          // the model's fixed "0" read-out — replaced by the live display below
-    if(m.name==='glass'){m.transparent=true;m.opacity=Math.min(m.opacity,.28);m.depthWrite=false;o.castShadow=false}   // lighter tint so the road is clear from the driver's seat
-    const w=/^(?:rim_235|tire_001_R17)\.?(00\d)?_/.exec(o.name);if(w){const k=w[1]||'0';(wheelParts[k]=wheelParts[k]||[]).push(o)}   // three.js drops the dots: rim_235.001 → rim_235001
+    if(m.name==='Vitres'||m.name==='glass'){m.transparent=true;m.opacity=Math.min(m.opacity,.18);m.envMapIntensity=.25;m.roughness=Math.max(m.roughness,.15);m.depthWrite=false;o.castShadow=false}   // lighter tint so the road is clear from the driver's seat
+    let n=o;while(n&&n!==model&&!/^wheel_\d/.test(n.name))n=n.parent;               // wheel_0…3: rim, tyre and nuts of one wheel
+    const w=n&&/^wheel_(\d)/.exec(n.name);if(w&&o.isMesh)(wheelParts[w[1]]=wheelParts[w[1]]||[]).push(o)
    });
    // rear lamps glow on braking
    if(tailMat.isMaterial){tailMat.emissive=new T.Color(0xff1010);tailMat.emissiveIntensity=.3}
    const back=new T.Box3().setFromObject(model);
-   for(const sx of [-.62,.62]){const sp=new T.Sprite(new T.SpriteMaterial({map:glowTex,color:0xff2a1a,blending:T.AdditiveBlending,depthWrite:false,transparent:true,opacity:0}));
-    sp.position.set(sx,.95,back.max.z+.05);sp.scale.set(1,.6,1);chassis.add(sp);glows.push(sp)}
+   for(const sx of [-.74,.74]){const sp=new T.Sprite(new T.SpriteMaterial({map:glowTex,color:0xff2a1a,blending:T.AdditiveBlending,depthWrite:false,transparent:true,opacity:0}));
+    sp.position.set(sx,.66,back.max.z+.05);sp.scale.set(1,.6,1);chassis.add(sp);glows.push(sp)}
    // wheels: rim + tyre spin together about the axle (brake calipers stay put)
    for(const k in wheelParts){const parts=wheelParts[k],bb=new T.Box3();for(const p of parts)bb.expandByObject(p);
     const piv=new T.Group();chassis.add(piv);piv.position.copy(chassis.worldToLocal(bb.getCenter(new T.Vector3())));piv.updateMatrixWorld(true);
     for(const p of parts)piv.attach(p);
     spinners.push(piv);
    }
-   // the car's own hanging pedals: pivot each at the top of its arm so it can be pressed
-   {const parts={L:[],R:[]};model.traverse(o=>{const m=/^pedal_([LR])/.exec(o.name);if(m&&o.isMesh)parts[m[1]].push(o)});
-    for(const k of ['L','R']){if(!parts[k].length)continue;const bb=new T.Box3();for(const p of parts[k])bb.expandByObject(p);
-     const pv=new T.Group();chassis.add(pv);pv.position.copy(chassis.worldToLocal(new T.Vector3((bb.min.x+bb.max.x)/2,bb.max.y,bb.min.z+.02)));pv.updateMatrixWorld(true);
-     const pad=new T.Box3();for(const p of parts[k])if(!/metal/.test(p.material.name))pad.expandByObject(p);
-     pv.userData.pad=pv.worldToLocal((pad.isEmpty()?bb:pad).getCenter(new T.Vector3()));
-     for(const p of parts[k]){pv.attach(p);p.layers.enable(1)}
-     pedalPiv[k==='L'?'brk':'acc']=pv}}
+   model.traverse(o=>{if(/^pedal_/.test(o.name))o.visible=false});   // placeholder pedals in the GLB: replaced by the full pedal box below
+   buildPedalBox(model);
    addWheelAndDriver();markReady('car');
   },undefined,err=>{console.error('Car GLB failed to load (serve the folder over http):',err);document.getElementById('windshield').classList.add('nogl');hideLoad()});
+
+
+  // ---------- pedal box: a sculpted carbon shroud under the dash hides the pivot shaft; two contoured alloy pedals hang from it ----------
+  function buildPedalBox(model){
+   const X0=DRIVER_X,PZ=-1.21,PY=.43;                                   // pivot (hidden inside the shroud), pulled back so his legs reach with the knees bent
+   let carbon=null;model.traverse(o=>{if(o.isMesh&&!carbon&&/CARBONE/i.test(o.material.name))carbon=o.material});
+   const shroudM=carbon?carbon.clone():new T.MeshStandardMaterial({color:lin('#0d0e10')});
+   Object.assign(shroudM,{metalness:.35,roughness:.32,envMapIntensity:1.1});
+   const alloy=new T.MeshStandardMaterial({color:lin('#c9ced4'),metalness:1,roughness:.18,envMapIntensity:1.3});
+   const satin=new T.MeshStandardMaterial({color:lin('#30343a'),metalness:.8,roughness:.35});
+   const rubber=new T.MeshStandardMaterial({color:lin('#0e0f10'),metalness:0,roughness:.85});
+   const put=(geo,mat,parent)=>{const m=new T.Mesh(geo,mat);m.castShadow=true;m.receiveShadow=true;m.layers.enable(1);parent.add(m);return m};
+   const rrect=(w,h,r)=>{const p=new T.Shape(),x=-w/2,y=-h/2;p.moveTo(x+r,y);p.lineTo(x+w-r,y);p.quadraticCurveTo(x+w,y,x+w,y+r);p.lineTo(x+w,y+h-r);
+     p.quadraticCurveTo(x+w,y+h,x+w-r,y+h);p.lineTo(x+r,y+h);p.quadraticCurveTo(x,y+h,x,y+h-r);p.lineTo(x,y+r);p.quadraticCurveTo(x,y,x+r,y);return p};
+   const ext=(shape,depth,bev)=>{const g=new T.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelThickness:bev,bevelSize:bev,bevelSegments:5,curveSegments:16});g.translate(0,0,-depth/2);return g};
+   const side=g=>{g.rotateY(Math.PI/2);return g};                       // shape drawn in (−z, y), extruded along x
+   // shroud: a rounded carbon wedge, wider at the dash and tapering down over the shaft
+   {const p=new T.Shape();                                              // side profile in (−z, y), car space relative to the pivot
+    p.moveTo(.085,.115);p.lineTo(-.075,.115);p.quadraticCurveTo(-.1,.115,-.095,.09);p.quadraticCurveTo(-.07,-.01,-.035,-.04);
+    p.quadraticCurveTo(0,-.06,.04,-.045);p.quadraticCurveTo(.08,-.025,.09,.03);p.quadraticCurveTo(.095,.115,.085,.115);
+    const g=side(ext(p,.34,.014));const m=put(g,shroudM,chassis);m.position.set(X0,PY,PZ);
+    for(const sx of [-1,1]){const c=put(new T.CylinderGeometry(.018,.018,.006,32),satin,chassis);c.rotation.z=Math.PI/2;c.position.set(X0+sx*.186,PY,PZ)}}   // hinge caps closing the shaft ends
+   const N=new T.Vector3(0,.46,.888),U=new T.Vector3(0,.888,-.46),R=new T.Vector3(1,0,0);         // pad face normal (towards the driver) and 'up the pedal'
+   const padQ=new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(R,U,N));
+   for(const [k,dx,w,h] of [['brk',-.085,.09,.095],['acc',.09,.066,.15]]){
+    const pv=new T.Group();pv.position.set(X0+dx,PY,PZ);chassis.add(pv);
+    const P=new T.Vector3(0,-.235,.11),B=P.clone().addScaledVector(N,-.016);   // pad centre, and the back of the pad where the arm meets it
+    // arm: a swept, tapering blade that curves forward then back to the pad (Bezier through a forward control point)
+    {const C=new T.Vector3(0,-.12,-.035),pts=[],n=24,L=[],Rr=[];
+     for(let i=0;i<=n;i++){const t=i/n,q=1-t;const y=q*q*0+2*q*t*C.y+t*t*B.y,z=q*q*0+2*q*t*C.z+t*t*B.z;
+      const dy=2*q*(C.y)+2*t*(B.y-C.y),dz=2*q*(C.z)+2*t*(B.z-C.z),l=Math.hypot(dy,dz),th=(.034-.014*t)/2;
+      const ny=-dz/l,nz=dy/l;L.push(new T.Vector2(-(z+nz*th),y+ny*th));Rr.push(new T.Vector2(-(z-nz*th),y-ny*th))}
+     const shape=new T.Shape([...L,...Rr.reverse()]);put(side(ext(shape,.014,.004)),alloy,pv)}
+    {const hub=put(new T.CylinderGeometry(.022,.022,.03,32),satin,pv);hub.rotation.z=Math.PI/2}  // hinge knuckle on the hidden shaft
+    // pad: a polished alloy plate with rounded corners, a rubber insert and raised grip strips
+    const plate=put(ext(rrect(w,h,.018),.008,.003),alloy,pv);plate.position.copy(P).addScaledVector(N,-.006);plate.quaternion.copy(padQ);
+    const ins=put(ext(rrect(w*.78,h*.82,.012),.004,.0015),rubber,pv);ins.position.copy(P).addScaledVector(N,-.0005);ins.quaternion.copy(padQ);
+    const ribs=k==='acc'?6:4;
+    for(let i=0;i<ribs;i++){const r=put(ext(rrect(w*.66,.0055,.0027),.003,.001),alloy,pv);
+     r.position.copy(P).addScaledVector(N,.0025).addScaledVector(U,(i-(ribs-1)/2)*h*.82/ribs);r.quaternion.copy(padQ)}
+    pv.userData.pad=P.clone();pedalPiv[k]=pv}
+  }
+
 
   // ---------- race steering wheel (GLB: Lamborghini Essenza SCV12) on the car's column ----------
   const RW_S=.068;                                          // model units → metres (≈30 cm across)
@@ -381,7 +423,7 @@
   // ---------- driver: Connor's forearms and hands (GLB, skinned), wrapped round the wheel's grips ----------
   const RIG_S=1.15,SHOULDER=new T.Vector3(0,-.17,-.1);       // adult-sized hands; shoulders just below and ahead of the eye
   const PALM_T=.022,TIP_T=.009,THUMB_C=.55;                 // palm half-thickness, fingertip pad, thumb curl
-  const HIPS_Y=.38,EYE_DY=-.07,headMeshes=[];               // hip-joint height on the seat; his eyes just under the camera; the head is hidden in Driver view (the camera is his eyes)
+  const HIPS_Y=.27,EYE_DY=-.05,headMeshes=[];               // hip-joint height on the seat; his eyes just under the camera; the head is hidden in Driver view (the camera is his eyes)
   function addDriver(){
    gltf.load('assets/models/connor_body.glb',g=>{
     const rig=g.scene;rig.scale.multiplyScalar(RIG_S);rig.rotation.y=Math.PI;chassis.add(rig);
@@ -499,7 +541,7 @@
   // ---------- foot-well mini view: the driver's right leg (GLB) working the car's own pedals ----------
   const pedalPiv={acc:null,brk:null},PRESS=.42;
   const footCam=new T.PerspectiveCamera(38,4/3,.02,30);
-  const FOOTCAM_POS=new T.Vector3(.28,.85,-.5),FOOTCAM_AT=new T.Vector3(0,.22,-1.36);  // over the right knee: both legs from the seat down to the feet and pedals
+  const FOOTCAM_POS=new T.Vector3(DRIVER_X+.26,.74,-.52),FOOTCAM_AT=new T.Vector3(DRIVER_X,.2,-1.2);  // over the right knee: both legs from the seat down to the feet and pedals
   footCam.layers.set(1);                                    // foot cam shows only the pedals, the leg and a plain floor — nothing in the way
   const footLight=new T.PointLight(0xfff2e0,1.6,2.2,2);footLight.position.set(-.1,.75,-1.15);footLight.layers.enable(1);chassis.add(footLight);
   const footFill=new T.HemisphereLight(0xdfeaf2,0x26313a,.9);footFill.layers.set(1);scene.add(footFill);
@@ -510,18 +552,16 @@
   const carpet=new T.MeshStandardMaterial({map:carpetTex,roughness:1,side:T.DoubleSide});
   const trim=new T.MeshStandardMaterial({color:lin('#202428'),roughness:.7,metalness:.1,side:T.DoubleSide});
   const fw=(geo,mat,x,y,z,rx=0)=>{const m=new T.Mesh(geo,mat);m.position.set(x,y,z);m.rotation.x=rx;m.layers.set(1);m.receiveShadow=true;chassis.add(m);return m};
-  fw(new T.PlaneGeometry(.95,1.32),carpet,0,.1,-1.08,-Math.PI/2);                          // floor, from the seat to the toe-board
+  fw(new T.PlaneGeometry(.8,1.1),carpet,DRIVER_X,.07,-.95,-Math.PI/2);                          // floor, from the seat to the toe-board
   const TB=Math.atan2(.34,.12);                                                             // toe-board rises from the floor up behind the pedal tops
-  fw(new T.PlaneGeometry(.95,.6),carpet,0,.37,-1.605,TB-Math.PI/2);
-  fw(new T.BoxGeometry(.95,.03,.26),trim,0,.6,-1.48);                                        // underside of the dash
-  fw(new T.BoxGeometry(.3,.05,.07),trim,0,.465,-1.56);                                      // pedal box: both pedal arms pivot here
-  fw(new T.BoxGeometry(.03,.16,.05),trim,-.13,.53,-1.56);fw(new T.BoxGeometry(.03,.16,.05),trim,.13,.53,-1.56);   // its two mounting struts up to the dash
+  fw(new T.PlaneGeometry(.8,.6),carpet,DRIVER_X,.34,-1.33,TB-Math.PI/2);
+  fw(new T.BoxGeometry(.8,.03,.4),trim,DRIVER_X,.56,-1.3);                                        // underside of the dash
   const wallM=carpet.clone();wallM.side=T.FrontSide;                                       // walls face inwards only, so the camera can look in from outside
-  for(const sx of [-1,1])fw(new T.PlaneGeometry(1.32,.5),wallM,sx*.475,.35,-1.08).rotation.y=-sx*Math.PI/2;      // footwell side walls
-  const footSeat=new T.Mesh(new T.BoxGeometry(.72,.17,.46),new T.MeshStandardMaterial({color:lin('#1c2024'),roughness:.85}));
-  footSeat.position.set(0,.29,-.37);footSeat.layers.set(1);chassis.add(footSeat);   // driver's seat cushion (foot cam only — the car has its own)
+  for(const sx of [-1,1])fw(new T.PlaneGeometry(1.1,.5),wallM,DRIVER_X+sx*.4,.32,-.95).rotation.y=-sx*Math.PI/2;      // footwell side walls
+  const footSeat=new T.Mesh(new T.BoxGeometry(.5,.12,.46),new T.MeshStandardMaterial({color:lin('#1c2024'),roughness:.85}));
+  footSeat.position.set(DRIVER_X,.12,-.36);footSeat.layers.set(1);chassis.add(footSeat);   // driver's seat cushion (foot cam only — the car has its own)
   const leg={ready:false,soleH:.1,ballBack:.15,cur:null,press:{acc:0,brk:0}};   // the driver's legs: Connor (same model as the hands), skinned GLB
-  const REST_L=new T.Vector3(-.24,.1,-1.4),REST_TOE=new T.Vector3(-.1,0,-1).normalize();   // left foot: flat on the floor, left of the brake
+  const REST_L=new T.Vector3(DRIVER_X-.22,.07,-1.06),REST_TOE=new T.Vector3(-.1,0,-1).normalize();   // left foot: flat on the floor, left of the brake
   const UP=new T.Vector3(0,1,0),PAD_N=new T.Vector3(0,.46,.888),PAD_U=new T.Vector3(0,.888,-.46);   // pedal pad: face normal (towards the driver) and 'up the pedal'
   const legRig={R:null,L:null};
   function setupLegs(rig){                                   // called by addDriver() with Connor's whole body, still standing
@@ -592,7 +632,8 @@
   const MW=.084,MH=.026;                                                        // mirror glass size (m)
   const mirrorRT=new T.WebGLRenderTarget(512,164);mirrorRT.texture.encoding=T.sRGBEncoding;
   const mirrorCam=new T.PerspectiveCamera(26,MW/MH,.1,400);
-  const mirror=new T.Group();chassis.add(mirror);
+  const MIRROR_ON=false;                                     // no rear-view mirror in the Lamborghini
+  const mirror=new T.Group();if(MIRROR_ON)chassis.add(mirror);
   {const chrome=new T.MeshStandardMaterial({color:lin('#dfe3e8'),metalness:1,roughness:.12,envMapIntensity:1.4});
    const piano=new T.MeshStandardMaterial({color:lin('#0b0d10'),metalness:.35,roughness:.2,envMapIntensity:1.2});
    const add=(geo,mat,parent)=>{const m=new T.Mesh(geo,mat);parent.add(m);return m};
@@ -643,8 +684,8 @@
   const dispC=document.createElement('canvas');dispC.width=2048;dispC.height=572;   // matches the screen's 3.6 : 1 shape, drawn at high resolution
   const dispT=new T.CanvasTexture(dispC);dispT.encoding=T.sRGBEncoding;dispT.anisotropy=ANISO;
   // the read-out sits in a digital speedometer cluster (GLB) where the car's own green display was
-  const SPD_S=1.75,cluster=new T.Group();cluster.rotation.x=-.346;cluster.scale.setScalar(SPD_S);   // leans back ~20° to face the driver
-  cluster.position.set(0,.735,-1.15).sub(new T.Vector3(0,.015,.03).multiplyScalar(SPD_S).applyEuler(cluster.rotation));chassis.add(cluster);
+  const SPD_S=1.3,cluster=new T.Group();cluster.rotation.x=-.346;cluster.scale.setScalar(SPD_S);   // leans back ~20° to face the driver
+  cluster.position.set(DRIVER_X,.69,-.95).sub(new T.Vector3(0,.015,.03).multiplyScalar(SPD_S).applyEuler(cluster.rotation));chassis.add(cluster);
   const disp=new T.Mesh(new T.PlaneGeometry(.236,.066),new T.MeshBasicMaterial({map:dispT,toneMapped:false}));
   disp.position.set(0,.015,.033);cluster.add(disp);
   new T.GLTFLoader().load('assets/models/speedometer.glb',g=>{const m=g.scene;cluster.add(m);
@@ -708,13 +749,13 @@
     camOffZ+=((6.2+st.v*.06)-camOffZ)*Math.min(1,dt*3);
     camera.position.set(cx+1.0,2.3,cz+camOffZ);look.set(cx-.25,.85,cz-6);wantFov=50+st.v*.32;camera.near=.1;
    }else{
-    car.updateMatrixWorld(true);camera.position.copy(chassis.localToWorld(EYE.clone()));          // the head rides with the car body, so the road buzz moves cabin, mirror and eyes together (no jitter)
+    car.updateMatrixWorld(true);camera.position.copy(chassis.localToWorld(EYE.clone().add(CAM_LIFT)));          // the head rides with the car body, so the road buzz moves cabin, mirror and eyes together (no jitter)
     look.set(cx+EYE.x,EYE.y-1.45+pitch*4,cz-12);wantFov=64;camera.near=.03;
     if(lookYaw||lookPitch){const sp=new T.Spherical().setFromVector3(look.clone().sub(camera.position));   // free look: turn the head
      sp.theta+=lookYaw;sp.phi=Math.min(Math.PI-.08,Math.max(.08,sp.phi+lookPitch));look.copy(camera.position).add(new T.Vector3().setFromSpherical(sp))}
    }
    fov+=(wantFov-fov)*Math.min(1,dt*4);camera.fov=fov;camera.updateProjectionMatrix();camera.lookAt(look);
-   renderMirror();
+   if(MIRROR_ON)renderMirror();
    renderer.render(scene,camera);
    renderPedalCam(st);
   }
